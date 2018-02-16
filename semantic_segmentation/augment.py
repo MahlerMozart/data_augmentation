@@ -52,7 +52,7 @@ def get_rotated_example(image, labels):
     rotated_labels = list()
     for label in labels:
         rotated_labels.append(tf.contrib.image.rotate(
-            label, rotation_angle, interpolation='BILINEAR'))
+            label, rotation_angle, interpolation='NEAREST'))
     # Get the first row and column in the image
     first_row_of_image = tf.cast(rotated_image[0, :, :], tf.float32)
     first_column_of_image = tf.cast(rotated_image[:, 0, :], tf.float32)
@@ -82,7 +82,8 @@ def get_rotated_example(image, labels):
     croped_resized_labels = list()
     for rotated_label in rotated_labels:
         croped_label = tf.image.resize_image_with_crop_or_pad(rotated_label, crop_size, crop_size)
-        croped_resized_labels.append(tf.image.resize_images(croped_label, (out_size, out_size)))
+        croped_resized_labels.append(tf.image.resize_images(
+            croped_label, (out_size, out_size), method=tf.image.ResizeMethod.NEAREST_NEIGHBOR))
     return croped_resized_image, croped_resized_labels
 
 
@@ -139,32 +140,8 @@ def get_rescaled_image(image, labels):
     # Crop and resize labels
     cropped_resized_labels = list()
     for label in labels:
-        resized_label = tf.image.resize_images(label, (resized_height, resized_width))
+        resized_label = tf.image.resize_images(
+            label, (resized_height, resized_width), method=tf.image.ResizeMethod.NEAREST_NEIGHBOR)
         cropped_resized_labels.append(
             tf.image.resize_image_with_crop_or_pad(resized_label, height, width))
     return cropped_image, cropped_resized_labels
-
-
-if __name__ == "__main__":
-    from PIL import Image
-    import numpy as np
-
-    filename_queue = tf.train.string_input_producer(['/home/jonas/Downloads/random.jpeg'])
-    reader = tf.WholeFileReader()
-    key, value = reader.read(filename_queue)
-    img = tf.image.decode_jpeg(value)
-    img = tf.image.resize_images(img, [512, 512])
-    image, labels = get_rescaled_image(img, [img, img])
-    init_op = tf.global_variables_initializer()
-    with tf.Session() as sess:
-        sess.run(init_op)
-        coord = tf.train.Coordinator()
-        threads = tf.train.start_queue_runners(coord=coord)
-        image_, labels_ = sess.run([image, labels])
-        image_formated = np.squeeze(np.asarray(image_, dtype=np.uint8))
-        Image.fromarray(image_formated).show()
-        for label in labels_:
-            label_formated = np.squeeze(np.asarray(label, dtype=np.uint8))
-            Image.fromarray(label_formated).show()
-        coord.request_stop()
-        coord.join(threads)
