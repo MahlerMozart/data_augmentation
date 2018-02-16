@@ -1,5 +1,5 @@
 import tensorflow as tf
-from augment import get_flipped_example, get_rotated_example, get_gaussian_noise_example,\
+from .augment import get_flipped_example, get_rotated_example, get_gaussian_noise_example,\
     get_rescaled_image
 
 
