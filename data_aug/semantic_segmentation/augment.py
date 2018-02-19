@@ -108,7 +108,7 @@ def get_gaussian_noise_example(image, label):
     return noisy_image, label
 
 
-def get_rescaled_image(image, labels):
+def get_rescaled_example(image, labels):
     """Scale up the input data spatial shape and then crop to input shape.
 
     Applys a upscaling of the inputs spatial size followed by a crop to restore the input shape
