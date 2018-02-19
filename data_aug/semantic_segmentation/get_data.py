@@ -1,6 +1,6 @@
 import tensorflow as tf
 from .augment import get_flipped_example, get_rotated_example, get_gaussian_noise_example,\
-    get_rescaled_image
+    get_rescaled_example
 
 
 def get_example(image, labels, prob=0.5):
@@ -50,7 +50,7 @@ def get_augmented_data(image, labels):
 
     def aug3(image, labels): return get_gaussian_noise_example(image, labels)
 
-    def aug4(image, labels): return get_rescaled_image(image, labels)
+    def aug4(image, labels): return get_rescaled_example(image, labels)
 
     image, labels = tf.case([(tf.equal(augmentation_index, 0), lambda: aug1(image, labels)),
                              (tf.equal(augmentation_index, 1), lambda: aug2(image, labels)),
